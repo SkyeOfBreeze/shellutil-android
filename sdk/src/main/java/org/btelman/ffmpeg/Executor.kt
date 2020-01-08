@@ -1,7 +1,11 @@
 package org.btelman.ffmpeg
 
 import android.os.AsyncTask
+import android.os.Build
+import org.btelman.logutil.kotlin.LogLevel
 import org.btelman.logutil.kotlin.LogUtil
+import org.btelman.logutil.kotlin.LogUtilInstance
+import java.io.BufferedReader
 import java.util.concurrent.atomic.AtomicBoolean
 
 /**
@@ -9,11 +13,12 @@ import java.util.concurrent.atomic.AtomicBoolean
  */
 class Executor(
     val OnStart : () -> Unit,
+    val OnProcess : (Process) -> Unit,
     val OnProgress : (String) -> Unit,
     val OnError : (String) -> Unit,
     val OnComplete : (Int?)->Unit
 ) : AsyncTask<String, String?, Int?>() {
-    private var log = LogUtil("Executor")
+    private var log = LogUtil("Executor", logInstance)
     private var process: Process? = null
 
     private var atomicKillSwitch = AtomicBoolean(false)
@@ -26,12 +31,15 @@ class Executor(
     }
 
     override fun doInBackground(vararg params: String?): Int? {
-        process = Runtime.getRuntime().exec(params) ?: return null
-        val reader = process?.inputStream?.bufferedReader() ?: return null
-        val errorReader = process?.errorStream?.bufferedReader()
         var error : String?
         var inputLine : String?
+        var reader: BufferedReader? = null
+        var errorReader: BufferedReader? = null
         try {
+            process = Runtime.getRuntime().exec(params) ?: return null
+            reader = (process?.inputStream?.bufferedReader() ?: return null)
+            errorReader = process?.errorStream?.bufferedReader()
+            OnProcess(process!!)
             while(!atomicKillSwitch.get()){
                 error = null
                 inputLine = null
@@ -43,6 +51,8 @@ class Executor(
                 }
                 if(inputLine != null || error != null)
                     publishProgress(inputLine, error)
+                if(!isProcessRunning())
+                    break
             }
             if(killWithGarbageData.get()){ //kill switch was tripped
                 process?.outputStream?.write("die".toByteArray())
@@ -52,7 +62,7 @@ class Executor(
             publishProgress(null, e.toString())
         }
         try{
-            reader.close()
+            reader?.close()
             errorReader?.close()
             process?.inputStream?.close()
             process?.destroy()
@@ -62,6 +72,19 @@ class Executor(
 
         }
         return null
+    }
+
+    private fun isProcessRunning(): Boolean {
+        return try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                process?.isAlive == true
+            } else {
+                process?.exitValue() == null //will only return false usually
+            }
+        }catch (e : Exception){
+            true //if process?.exitValue() crashes, the process is running.
+            // Need to find a better way to check if it is running...
+        }
     }
 
     override fun onProgressUpdate(vararg values: String?) {
@@ -102,5 +125,11 @@ class Executor(
     fun execute(command : String){
         val list = command.split(" ").toTypedArray()
         executeOnExecutor(THREAD_POOL_EXECUTOR, *list)
+    }
+
+    companion object{
+        var logInstance = LogUtilInstance("ffmpeg-lib", LogLevel.DEBUG).also {
+            LogUtil.addCustomLogUtilInstance("ffmpeg-lib", it)
+        }
     }
 }
