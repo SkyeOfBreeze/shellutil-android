@@ -2,6 +2,8 @@ package org.btelman.ffmpeg
 
 import android.os.AsyncTask
 import android.os.Build
+import android.os.Handler
+import android.os.Looper
 import org.btelman.logutil.kotlin.LogLevel
 import org.btelman.logutil.kotlin.LogUtil
 import org.btelman.logutil.kotlin.LogUtilInstance
@@ -23,10 +25,24 @@ class Executor(
 
     private var atomicKillSwitch = AtomicBoolean(false)
     private var killWithGarbageData = AtomicBoolean(false)
+    private var handler : Handler? = null
+
+
+    /**
+     * Set thread for the events to run on. If this is not called, the UI thread will be used
+     */
+    fun setEventThread(){
+        log.d("setEventThread")
+        Looper.myLooper() ?: runCatching { Looper.prepare() }  //create a looper if none exists
+        handler = Handler(Looper.myLooper())
+    }
 
     override fun onPreExecute() {
         super.onPreExecute()
-        OnStart()
+        handler?: run{
+            handler = Handler(Looper.getMainLooper())
+        }
+        handler?.post(OnStart)
         log.d("onPreExecute")
     }
 
@@ -39,7 +55,7 @@ class Executor(
             process = Runtime.getRuntime().exec(params) ?: return null
             reader = (process?.inputStream?.bufferedReader() ?: return null)
             errorReader = process?.errorStream?.bufferedReader()
-            OnProcess(process!!)
+            handler?.post { process ?.let(OnProcess) }
             while(!atomicKillSwitch.get()){
                 error = null
                 inputLine = null
@@ -51,7 +67,7 @@ class Executor(
                 }
                 if(inputLine != null || error != null)
                     publishProgress(inputLine, error)
-                if(!isProcessRunning())
+                else if(!isProcessRunning()) //only see about breaking out of loop if there is no more data to read
                     break
             }
             if(killWithGarbageData.get()){ //kill switch was tripped
@@ -91,18 +107,18 @@ class Executor(
         super.onProgressUpdate(*values)
         values[0]?.let {
             log.d("Progress: $it")
-            OnProgress(it)
+            handler?.post { OnProgress(it) }
         }
 
         values[1]?.let {
             log.e("Error: $it")
-            OnError(it)
+            handler?.post { OnError(it) }
         }
     }
 
     override fun onPostExecute(result: Int?) {
         super.onPostExecute(result)
-        OnComplete(result)
+        handler?.post { OnComplete(result) }
         log.d("OnComplete: $result")
     }
 
