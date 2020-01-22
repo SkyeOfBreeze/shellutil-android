@@ -14,6 +14,7 @@ class ExecutorSanityTests : AppCompatActivity() {
         setContentView(R.layout.activity_executor_sanity_tests)
         startOnBackgroundThread()
         startOnUIThread()
+        applicationContext.assets.openFd("")
     }
 
     fun startOnUIThread(){

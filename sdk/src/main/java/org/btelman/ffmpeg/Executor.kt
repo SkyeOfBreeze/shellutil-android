@@ -105,14 +105,16 @@ class Executor(
 
     override fun onProgressUpdate(vararg values: String?) {
         super.onProgressUpdate(*values)
-        values[0]?.let {
-            log.d("Progress: $it")
-            handler?.post { OnProgress(it) }
-        }
+        handler?.post {
+            values[0]?.let {
+                log.d("Progress: $it")
+                OnProgress(it)
+            }
 
-        values[1]?.let {
-            log.e("Error: $it")
-            handler?.post { OnError(it) }
+            values[1]?.let {
+                log.e("Error: $it")
+                OnError(it)
+            }
         }
     }
 
