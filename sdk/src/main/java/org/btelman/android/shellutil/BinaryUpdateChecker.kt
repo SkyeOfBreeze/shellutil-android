@@ -49,15 +49,15 @@ object BinaryUpdateChecker {
         return File(context.filesDir, name)
     }
 
-    fun CheckBinaryCorrectVersion(assetMananager: AssetManager, name : String, file : File) : Boolean{
+    fun CheckBinaryCorrectVersion(assetManager: AssetManager, name : String, file : File) : Boolean{
         val assetPath =
             GetPreferredBinaryLocation(
-                assetMananager,
+                assetManager,
                 name
             )
         return assetPath?.let{
             CheckBinaryCorrectVersion(
-                assetMananager.open(name),
+                assetManager.open(name),
                 file
             )
         } ?: false
