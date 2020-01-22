@@ -8,6 +8,7 @@ import org.btelman.logutil.kotlin.LogLevel
 import org.btelman.logutil.kotlin.LogUtil
 import org.btelman.logutil.kotlin.LogUtilInstance
 import java.io.BufferedReader
+import java.io.PrintStream
 import java.util.concurrent.atomic.AtomicBoolean
 
 /**
@@ -48,25 +49,18 @@ class Executor(
 
     override fun doInBackground(vararg params: String?): Int? {
         var error : String?
-        var inputLine : String?
-        var reader: BufferedReader? = null
         var errorReader: BufferedReader? = null
         try {
             process = Runtime.getRuntime().exec(params) ?: return null
-            reader = (process?.inputStream?.bufferedReader() ?: return null)
             errorReader = process?.errorStream?.bufferedReader()
             handler?.post { process ?.let(OnProcess) }
             while(!atomicKillSwitch.get()){
                 error = null
-                inputLine = null
                 if(errorReader?.ready() == true){
                     error = errorReader.readLine()
                 }
-                if(reader.ready()){
-                    inputLine = reader.readLine()
-                }
-                if(inputLine != null || error != null)
-                    publishProgress(inputLine, error)
+                if(error != null)
+                    publishProgress(error)
                 else if(!isProcessRunning()) //only see about breaking out of loop if there is no more data to read
                     break
             }
@@ -75,17 +69,18 @@ class Executor(
             }
         } catch (e: Exception) {
             e.printStackTrace()
-            publishProgress(null, e.toString())
+            publishProgress(e.toString())
         }
         try{
-            reader?.close()
             errorReader?.close()
             process?.inputStream?.close()
             process?.destroy()
             process?.waitFor()
             return process?.exitValue()
         } catch (e: Exception) {
-
+            handler?.post {
+                OnError(e.toString())
+            }
         }
         return null
     }
@@ -109,11 +104,6 @@ class Executor(
             values[0]?.let {
                 log.d("Progress: $it")
                 OnProgress(it)
-            }
-
-            values[1]?.let {
-                log.e("Error: $it")
-                OnError(it)
             }
         }
     }
