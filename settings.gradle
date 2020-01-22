@@ -1,2 +1,2 @@
-include ':app', ':sdk'
+include ':app', ':shellutil'
 rootProject.name='shellutil-android'

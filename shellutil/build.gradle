@@ -8,8 +8,9 @@ android {
     defaultConfig {
         minSdkVersion 16
         targetSdkVersion 28
-        versionCode 1
-        versionName "1.0"
+        versionCode buildNumber
+        versionName versionSemantic
+        versionNameSuffix + '-' + gitHash
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles 'consumer-rules.pro'
@@ -34,3 +35,13 @@ dependencies {
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
 }
+
+ext{
+    publishedGroupId = 'org.btelman.android'
+    libraryName = 'kotlin'
+    artifact = 'shellutil'
+
+    libraryDescription = 'Shell wrapper with binary update utility functions'
+}
+
+apply from: '../bintray.gradle'
