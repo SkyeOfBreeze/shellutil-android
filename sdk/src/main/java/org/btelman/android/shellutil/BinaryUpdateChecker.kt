@@ -13,14 +13,14 @@ import java.util.*
  * Utility class for updating binaries.
  */
 object BinaryUpdateChecker {
-    fun GetPreferredBinaryLocation(assetMananager : AssetManager, name : String) : String?{
+    fun GetPreferredBinaryLocation(assetManager : AssetManager, name : String) : String?{
         if(Build.VERSION.SDK_INT < 21){
             val path = when(Build.CPU_ABI){
                 "x86" -> "x86/$name"
                 else -> "armeabi-v7a/$name"
             }
             val result = kotlin.runCatching {
-                assetMananager.open(path)
+                assetManager.open(path)
             }
             if(result.isSuccess)
                 return path
@@ -33,7 +33,7 @@ object BinaryUpdateChecker {
                     else -> "armeabi-v7a/$name"
                 }
                 val result = kotlin.runCatching {
-                    assetMananager.open(path)
+                    assetManager.open(path)
                 }
                 if(result.isSuccess)
                     return path
