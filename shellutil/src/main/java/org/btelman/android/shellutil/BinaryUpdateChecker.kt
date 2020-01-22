@@ -57,7 +57,7 @@ object BinaryUpdateChecker {
             )
         return assetPath?.let{
             CheckBinaryCorrectVersion(
-                assetManager.open(name),
+                assetManager.open(it),
                 file
             )
         } ?: false
