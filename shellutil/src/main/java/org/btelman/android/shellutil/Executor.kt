@@ -28,7 +28,7 @@ class Executor(
     private var atomicKillSwitch = AtomicBoolean(false)
     private var killWithGarbageData = AtomicBoolean(false)
     private var handler : Handler? = null
-
+    var allowReadLogsOnInputStream = true
 
     /**
      * Set thread for the events to run on. If this is not called, the UI thread will be used
@@ -51,15 +51,22 @@ class Executor(
     override fun doInBackground(vararg params: String?): Int? {
         var error : String?
         var errorReader: BufferedReader? = null
+        var inputReader: BufferedReader? = null
         try {
             process = Runtime.getRuntime().exec(params) ?: return null
             errorReader = process?.errorStream?.bufferedReader()
+            if(allowReadLogsOnInputStream)
+                inputReader = process?.inputStream?.bufferedReader()
             handler?.post { process ?.let(OnProcess) }
             while(!atomicKillSwitch.get()){
                 error = null
                 if(errorReader?.ready() == true){
                     error = errorReader.readLine()
                 }
+                else if(inputReader?.ready() == true){
+                    error = inputReader.readLine()
+                }
+
                 if(error != null)
                     publishProgress(error)
                 else if(!isProcessRunning()) //only see about breaking out of loop if there is no more data to read
@@ -74,6 +81,7 @@ class Executor(
         }
         try{
             errorReader?.close()
+            inputReader?.close()
             process?.inputStream?.close()
             process?.destroy()
             process?.waitFor()
