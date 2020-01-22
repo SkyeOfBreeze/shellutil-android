@@ -1,4 +1,4 @@
-package org.btelman.ffmpeg
+package org.btelman.android.shellutil
 
 import org.junit.Test
 

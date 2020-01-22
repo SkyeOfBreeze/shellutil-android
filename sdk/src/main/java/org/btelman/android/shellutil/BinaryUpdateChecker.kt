@@ -1,4 +1,4 @@
-package org.btelman.ffmpeg
+package org.btelman.android.shellutil
 
 import android.content.Context
 import android.content.res.AssetManager
@@ -50,9 +50,16 @@ object BinaryUpdateChecker {
     }
 
     fun CheckBinaryCorrectVersion(assetMananager: AssetManager, name : String, file : File) : Boolean{
-        val assetPath = GetPreferredBinaryLocation(assetMananager, name)
+        val assetPath =
+            GetPreferredBinaryLocation(
+                assetMananager,
+                name
+            )
         return assetPath?.let{
-            CheckBinaryCorrectVersion(assetMananager.open(name), file)
+            CheckBinaryCorrectVersion(
+                assetMananager.open(name),
+                file
+            )
         } ?: false
     }
 
@@ -61,11 +68,15 @@ object BinaryUpdateChecker {
             return false
         return try {
             val assetFileSha1 = assetInputStream.let { fis ->
-                createSha1(fis).also {
+                createSha1(fis)
+                    .also {
                     fis.close()
                 }
             }
-            val fileSha1 = createSha1(targetFile)
+            val fileSha1 =
+                createSha1(
+                    targetFile
+                )
             fileSha1 == assetFileSha1
         } catch (e: Exception) {
             false
@@ -123,7 +134,9 @@ object BinaryUpdateChecker {
         }
         val sha1 : ByteArray = digest.digest()
         fis.close()
-        return byteArray2Hex(sha1)
+        return byteArray2Hex(
+            sha1
+        )
     }
 
     @Throws(Exception::class)
@@ -138,7 +151,9 @@ object BinaryUpdateChecker {
             }
         }
         val sha1 : ByteArray = digest.digest()
-        return byteArray2Hex(sha1)
+        return byteArray2Hex(
+            sha1
+        )
     }
 
     private fun byteArray2Hex(hash: ByteArray): String {

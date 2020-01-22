@@ -1,4 +1,4 @@
-package org.btelman.ffmpeg.demo
+package org.btelman.android.shellutil.demo
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -6,7 +6,7 @@ import android.os.Handler
 import android.os.HandlerThread
 import android.util.Log
 import kotlinx.android.synthetic.main.activity_executor_sanity_tests.*
-import org.btelman.ffmpeg.Executor
+import org.btelman.android.shellutil.Executor
 
 class ExecutorSanityTests : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

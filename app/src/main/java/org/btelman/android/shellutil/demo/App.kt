@@ -1,4 +1,4 @@
-package org.btelman.ffmpeg.demo
+package org.btelman.android.shellutil.demo
 
 import android.app.Application
 

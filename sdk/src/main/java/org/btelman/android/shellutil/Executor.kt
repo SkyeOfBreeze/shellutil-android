@@ -1,4 +1,4 @@
-package org.btelman.ffmpeg
+package org.btelman.android.shellutil
 
 import android.os.AsyncTask
 import android.os.Build
@@ -8,7 +8,6 @@ import org.btelman.logutil.kotlin.LogLevel
 import org.btelman.logutil.kotlin.LogUtil
 import org.btelman.logutil.kotlin.LogUtilInstance
 import java.io.BufferedReader
-import java.io.PrintStream
 import java.util.concurrent.atomic.AtomicBoolean
 
 /**
@@ -21,7 +20,9 @@ class Executor(
     val OnError : (String) -> Unit,
     val OnComplete : (Int?)->Unit
 ) : AsyncTask<String, String?, Int?>() {
-    private var log = LogUtil("Executor", logInstance)
+    private var log = LogUtil("Executor",
+        logInstance
+    )
     private var process: Process? = null
 
     private var atomicKillSwitch = AtomicBoolean(false)
