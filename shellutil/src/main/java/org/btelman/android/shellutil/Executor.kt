@@ -140,11 +140,19 @@ class Executor(
     }
 
     fun execute(command : String){
-        val list = command.split(" ").toTypedArray()
+        val list = command.split(" ").map { //split by space
+            it.replace(CHARACTER_SPACE, " ") //now add spaces back to the original params
+        }.toTypedArray()
         executeOnExecutor(THREAD_POOL_EXECUTOR, *list)
     }
 
     companion object{
+        /**
+         * Space character to be used to preserve spaces after splitting based on space
+         *
+         * "\u0020"
+         */
+        const val CHARACTER_SPACE = "\\u0020"
         var logInstance = LogUtilInstance("ffmpeg-lib", LogLevel.DEBUG).also {
             LogUtil.addCustomLogUtilInstance("ffmpeg-lib", it)
         }
