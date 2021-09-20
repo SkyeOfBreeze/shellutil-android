@@ -1,7 +1,7 @@
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
-apply plugin: 'maven-publish'
+apply plugin: 'com.github.dcendents.android-maven'
 android {
     compileSdkVersion 28
 
@@ -29,6 +29,7 @@ android {
         // but continue the build even when errors are found:
         abortOnError false
     }
+    buildToolsVersion '30.0.3'
 }
 
 dependencies {
