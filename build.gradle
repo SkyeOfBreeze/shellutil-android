@@ -26,9 +26,9 @@ def getGitHash = { ->
 
 ext{
     globalBuildToolsVersion = "28.0.3"
-    buildNumber = 6
+    buildNumber = 7
     gitHash = getGitHash()
-    versionSemantic = "1.5"
+    versionSemantic = "1.6"
 
     bintrayRepo = 'maven'
     bintrayName = 'shellutil-android'
