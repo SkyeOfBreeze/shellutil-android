@@ -36,7 +36,7 @@ class Executor(
     fun setEventThread(){
         log.d("setEventThread")
         Looper.myLooper() ?: runCatching { Looper.prepare() }  //create a looper if none exists
-        handler = Handler(Looper.myLooper())
+        handler = Handler(Looper.myLooper()!!)
     }
 
     override fun onPreExecute() {
